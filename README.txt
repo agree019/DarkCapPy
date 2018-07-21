@@ -1,0 +1,1 @@
+This package contains all function definitions from ArXiV:1509.07525v3
