@@ -8,7 +8,7 @@ import scipy.interpolate as interpolate
 
 from DarkCapPy.Configure.Constants  import *
 from DarkCapPy.Configure.AtomicData import *
-from DarkCapPy.Configure.EarthData  import *
+from DarkCapPy.Configure.PlanetData  import *
 from DarkCapPy.Configure.Conversions import amu2GeV
 
 # import os
