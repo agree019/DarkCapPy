@@ -17,6 +17,7 @@ from DarkCapPy.Configure.Conversions import amu2GeV
 
 
 
+
 ################################################################
 # Capture Rate Functions
 ################################################################
@@ -444,6 +445,36 @@ def cCapQuick(m_X, m_A, epsilon, alpha_X, kappa0):
 
 
 
+################################################################
+# Thermal Relic
+################################################################
+def alphaTherm(m_X, m_A):
+    '''
+    alphaTherm(m_X,m_A)
+    
+    This function sets alpha_X given the dark matter relic abundance
+    '''
+
+    conversion = (5.06e13)**3/ (1.52e24) # cm^3 Sec -> GeV^-2
+    thermAvgSigmaV = 2.2e-26 # cm^3/s from ArXiV: 1602.01465v3 between eqns (4) and (5)
+    
+    function = conversion * thermAvgSigmaV * (m_X**2/np.pi) \
+    * (1 - 0.5*(m_A/m_X)**2)**2 / ((1 - (m_A/m_X)**2)**(3./2))
+    return np.sqrt(function)
+
+# Thermal Relic for m_X >> m_A Approximation
+def alphaThermApprox(m_X):
+    '''
+    alphaThermApprox(m_X)
+    
+    This function sets alpha given the dark matter relic abundance in the m_X >> m_A limit
+    '''
+    conversion = (5.06e13)**3/ (1.52e24) # cm^3 Sec -> GeV^-2
+    thermAvgSigmaV = 2.2e-26 # cm^3/s from ArXiV: 1602.01465v3 between eqns (4) and (5)
+
+    function = conversion * thermAvgSigmaV * (5.06e13)**3/ (1.52e24) * (m_X**2/np.pi)
+    return np.sqrt(function)
+
 
 
 
@@ -548,12 +579,12 @@ def thermAvgSommerfeld(m_X, m_A, alpha_X):
 ########################
 #  CAnnCalc
 ########################
-def cAnnCalc(m_X, sigmaVTree, thermAvgSomm = 1):
+def cAnn(m_X, sigmaVTree, thermAvgSomm = 1):
 	'''
 	CAnnCalc(m_X, sigmaVTree, thermAvgSomm = 1) 
 
 	Returns the Annihilation rate in sec^-1 without Sommerfeld effects.
-	To include sommerfeld effects, set thermAveSomm = thermAvgSommerfeld(m_X, m_A, alpha_X)
+	To include sommerfeld effects, set thermAvgSomm = thermAvgSommerfeld(m_X, m_A, alpha_X)
 
 	[m_X] = GeV
 	[sigmaVTree] = GeV^-2
