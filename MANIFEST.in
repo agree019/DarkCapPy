@@ -8,4 +8,8 @@ include DarkCapPy/Configure/PREM500.csv
 
 include DarkCapPy/brtoe.csv
 
-include 
+include DataFiles
+
+include DarkCapPy_Template.ipynb
+
+include DarkCapPy_Test.ipynb
