@@ -8,7 +8,7 @@ include DarkCapPy/Configure/PREM500.csv
 
 include DarkCapPy/brtoe.csv
 
-include DataFiles
+include Template_Calculation
 
 include DarkCapPy_Template.ipynb
 
