@@ -24,7 +24,7 @@ setup(
 
 	license = 'MIT',
 
-	install_requires = ['numpy','matplotlib','scipy','pandas'],
+	install_requires = ['numpy','scipy','pandas'],
 
 	download_url = 'https://github.com/agree019/DarkCapPy'
 	)

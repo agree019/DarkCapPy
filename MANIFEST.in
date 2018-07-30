@@ -6,6 +6,7 @@ include_package_data = True
 
 include DarkCapPy/Configure/PREM500.csv
 
-include DarkCapPy/Template_Calculation
+include DarkCapPy/Template_Calculation/DarkCapPy_Template.ipynb
 
+include DarkCapPy/Template_Calculation/Branching_Ratio/brtoe.csv
 
