@@ -4,14 +4,23 @@ recursive-include examples *
 
 include_package_data = True
 
+include DarkCapPy/DarkCapPy_Test.ipynb
+
 include DarkCapPy/Configure/PREM500.csv
 
 include DarkCapPy/Template_Calculation/DarkCapPy_Template.ipynb
 
-include DarkCapPy/Template_Calculation/brtoe.csv
+include DarkCapPy/Template_Calculation/Branching_Ratio/brtoe.csv
 
-include DarkCapPy/DarkCapPy_Test.ipynb
+include DarkCapPy/Template_Calculation/Branching_Ratio/Branching_Ratio_READ_ME.txt
 
-include DarkCapPy/Template_Calculation/100GeVSommerfeld.csv
+include DarkCapPy/Template_Calculation/Sommerfeld/100GeVSommerfeld.csv
 
-include DarkCapPy/Template_Calculation/100GeVSignal.csv
+include DarkCapPy/Template_Calculation/Sommerfeld/Sommerfeld_READ_ME.txt
+
+include DarkCapPy/Template_Calculation/Signal/100GeVSignal.csv
+
+include DarkCapPy/Template_Calculation/Signal/Signal_READ_ME.txt
+
+include DarkCapPy/Template_Calculation/Signal/Signal_Backups/Signal_Backups_READ_ME.txt
+

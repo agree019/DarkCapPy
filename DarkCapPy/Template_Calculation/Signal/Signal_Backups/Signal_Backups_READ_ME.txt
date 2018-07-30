@@ -1,0 +1,1 @@
+This folder stores the backup Signal files generated when populating a signal file.
