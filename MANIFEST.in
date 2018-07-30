@@ -8,5 +8,6 @@ include DarkCapPy/Configure/PREM500.csv
 
 include DarkCapPy/Template_Calculation/DarkCapPy_Template.ipynb
 
-include DarkCapPy/Template_Calculation/Branching_Ratio/brtoe.csv
+include DarkCapPy/Template_Calculation/brtoe.csv
 
+include DarkCapPy/DarkCapPy_Test.ipynb
