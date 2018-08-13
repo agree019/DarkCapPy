@@ -11,8 +11,7 @@ global V_cross
 global V_gal
 global u_0
 global k
-global n_X
-global mf
+# global mf
 global RCross
 global RCrit
 
