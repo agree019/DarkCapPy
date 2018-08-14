@@ -10,35 +10,43 @@ DarkCapPy is a Python 3/Jupyter package for calculating rates associated with da
 import numpy as np
 import pandas as pd
 from scipy.interpolate import interpolate
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-import matplotlib.style
-mpl.rcParams.update(mpl.rcParamsDefault)
-%matplotlib inline
-from datetime import datetime
 
 from DarkCapPy import *
 import DarkCapPy.DarkPhoton as DP
 
-###################
-# Define File Paths
-###################
-# These paths are specific to the preset folders in Temp;ate_Caluclation
-def sommerfeldPath(file):
-    path = 'Sommerfeld/' + file
-    return path
+mx = 1000
+ma = 1
+epsilon = 1e-8
+alpha = 1/137
+alphax = 0.035
+tauCross = DP.tauCross
 
-def branchPath(file):
-    path = 'Branching_Ratio/' + file
-    return path
+cap1 = DP.cCap(mx,ma,epsilon,alpha,alphax)
+kappa0 = DP.kappa_0(mx,alpha)
+cap2 = DP.cCapQuick(mx,ma,epsilon,alphax,kappa0)
 
-def signalPath(file):
-    path = 'Signal/' + file
-    return path
-    
-def signalBackupPath(file):
-    path = 'Signal/Signal_Backups/' + file
-    return path
+sommerfeld = DP.thermAvgSommerfeld(mx,ma,alphax)
+sigma = DP.sigmaVtree(mx,ma,alphax)
+ann = DP.cAnn(mx,sigma,sommerfeld)
 
-print ('Complete')
+tau = DP.tau(cap1,ann)
+
+gammaAnn = DP.gammaAnn(cap1,ann)
+L = DP.decayLength(mx,ma,epsilon,1)
+Edecay = DP.epsilonDecay(L)
+
+signal = DP.iceCubeSignal(gammaAnn,Edecay,DP.yr2s(10))
+
+
+print ('Capture_1            :', cap1)
+print ('Kappa_0              :', kappa0)
+print ('Capture_2            :', cap2)
+print ('Therm Avg Sommerfeld :', sommerfeld)
+print ('Sigma V              :', sigma)
+print ('Annihilation         :', ann)
+print ('EQ Time              :', tau)
+print ('Gamma_ann            :', gammaAnn)
+print ('Decay Length         :', L)
+print ('Epsilon_decay        :', Edecay)
+print ('N_signal             :', signal)
 ```
