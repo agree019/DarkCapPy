@@ -9,15 +9,15 @@ DarkCapPy/
 ||--PREM500.csv
 ||Template_Calculation/
 ||--DarkCapPy_Template.ipynb
-||--Branching_Ratio
+||--Branching_Ratio/
 ||----Branching_Ratio.READ_ME.txt
 ||----brtoe.csv
-||--Signal
+||--Signal/
 ||----Signal_READ_ME.txt
 ||----100GeVSignal.csv
-||----Signal_Backups
+||----Signal_Backups/
 ||------Signal_Backups_Read_ME.txt
-||--Sommerfeld
+||--Sommerfeld/
 ||----Sommerfeld_READ_ME.txt
 ||----100GeVSommerfeld.csv
 
