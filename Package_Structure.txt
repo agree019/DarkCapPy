@@ -7,7 +7,7 @@ DarkCapPy/
 ||--Constants.py
 ||--PlanetData.py
 ||--PREM500.csv
-||Template_Calculation
+||Template_Calculation/
 ||--DarkCapPy_Template.ipynb
 ||--Branching_Ratio
 ||----Branching_Ratio.READ_ME.txt
