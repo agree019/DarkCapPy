@@ -6,12 +6,12 @@ DarkCapPy is a Python 3/Jupyter package for calculating rates associated with da
 
 ## DarkCapPy Dependencies
 
-Python version 3.6.2
+Python 3.6.2
 
 __Python Packages__
- - Numpy
- - Scipy 
- - Pandas
+ - Numpy 1.14.3
+ - Scipy 0.19.1
+ - Pandas 0.22.0
 
 
 ## Installation with PIP
