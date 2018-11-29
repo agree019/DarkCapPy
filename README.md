@@ -4,9 +4,71 @@ Written by: Adam Green (agree019@ucr.edu) and Philip Tanedo (flip.tanedo@ucr.edu
 
 DarkCapPy is a Python 3/Jupyter package for calculating rates associated with dark matter capture in the Earth, annihilation into light mediators, and the subsequent observable decay of the light mediators near the surface of the Earth. The package includes a calculation of the Sommerfeld enhancement at the center of the Earth and the timescale for capture--annihilation equilibrium. The code is open source and can be modified for other compact astronomical objects and mediator spins. The reference paper can be found at: https://arxiv.org/abs/1509.07525v3. Along with being included in the package, the manual can be found at https://arxiv.org/abs/1808.03700.
 
+## DarkCapPy Dependencies
+
+Python version 3.6.2
+
+__Python Packages__
+ - Numpy
+ - Scipy 
+ - Pandas
+
+
 ## Installation with PIP
 
 `pip install git+https://github.com/agree019/DarkCapPy`
+
+## Package Structure
+```
+DarkCapPy/
+||DarkPhoton.py
+||Configure/
+||--AtomicData.py
+||--Constants.py
+||--PlanetData.py
+||--PREM500.csv
+||Template_Calculation/
+||--DarkCapPy_Template.ipynb
+||--Branching_Ratio/
+||----Branching_Ratio.READ_ME.txt
+||----brtoe.csv
+||--Signal/
+||----Signal_READ_ME.txt
+||----100GeVSignal.csv
+||----Signal_Backups/
+||------Signal_Backups_Read_ME.txt
+||--Sommerfeld/
+||----Sommerfeld_READ_ME.txt
+||----100GeVSommerfeld.csv
+```
+
+## File Descriptions
+#### DarkPhoton.py
+This file contains all the function definitions to calculate the "Earthshine" scenario.
+
+#### AtomicData.py
+This file contains information about elements, eg: atomic mass, number of protons.
+
+#### Constants.py
+This file initializes all constants used in this calculation.
+
+#### PlanetData.py
+This file initializes the planet-dependent quantities, eg: enclosed mass, escape velocity. The input comma separated file (csv) file defines the planet.
+
+#### PREM500.csv
+This csv file contains radius and density information about Earth.
+
+#### DarkCapPy_Template.ipynb
+This Jupyter notebook contains an example implementation of DarkCapPy
+
+#### brtoe.csv
+This file stores the branching ratio to electron-positron pairs as a function of mediator mass.
+
+#### 100GeVSignal.csv
+This file is a completed Signal file for dark matter with a mass of 100 GeV.
+
+#### 100GeVSommerfeld.csv
+This file is a completed Sommerfeld file for dark matter with a mass of 100 GeV.
 
 ## Example use
 ```python
