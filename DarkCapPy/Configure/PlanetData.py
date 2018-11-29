@@ -9,6 +9,7 @@ from .Conversions import *
 
 ##########################
 # Taken from: https://stackoverflow.com/questions/779495/python-access-data-in-package-subdirectory
+# This imports the file 'PREM500.csv' within the DarkCapPy package so the user doesn't have to.
 import os
 this_dir, this_filename = os.path.split(__file__)
 DATA_PATH = os.path.join(this_dir, "PREM500.csv")
@@ -21,8 +22,7 @@ DATA_PATH = os.path.join(this_dir, "PREM500.csv")
 ##########################
 data = pd.read_csv(DATA_PATH)
 
-
-radiusTemp1 = data['Radius[m]']  # Radius in Meters
+radiusTemp1 = data['Radius[m]']  # Radius in meters
 densityTemp1 = data[['Density[kg/m^3]']] # Density in kg/m^3
 
 # # The interpolation function doesn't like these objects, so they need to be massaged into 1-D numpy arrays
@@ -39,10 +39,10 @@ densityList = densityListBadUnits[1:] * (100)**-3 * 1000 #  in g/cm^3
 ##########################
 # Shell Thickness
 ##########################
-# We define lenRadiusListm1 in order to give a deltaRList which has the same length as radiusList
-lenRadiusListm1 = radiusList[0:len(radiusList)-1]
-s = [0]
-for i in lenRadiusListm1:
+# We define the variable 'radiusListm1' in order to give a deltaRList which has the same length as radiusList
+radiusListm1 = radiusList[0:len(radiusList)-1]
+s = [0] # Temporary variable used to obtain deltaRList. Stores radiusList offset by one index.
+for i in radiusListm1:
     s.append(i)
 
 deltaRList = radiusList[0:len(radiusList)] - s[0:len(s)]
@@ -63,25 +63,25 @@ for i in lenRadiusList:
 # Enclosed Mass
 ##########################
 enclosedMassList = []
-tempSum = 0
+tempMassSum = 0 # Temporary mass shell sum
 for i in shellMassList:
-    tempSum = tempSum + i
-    enclosedMassList.append(tempSum)
+    tempMassSum = tempMassSum + i # add value of shellMass to previous sum
+    enclosedMassList.append(tempMassSum)
 
 
 ##########################
 # Escape Velocity
 ##########################
 
-def accumulate(index):
+def escVelFunc(index):
     '''
-    accumulate(index)
+    escVelFunc(index)
 
-    This is the exact same function as in Mathematica
+    This is the exact same function as Accumulate in Mathematica
     
     returns the escape velocity at the specified index
     '''
-    factor = 2.*G/c**2
+    factor = 2.*G/c**2 # prefactor
     constant = max(enclosedMassList) / max(radiusList)
     
     if (index == 0):
@@ -95,11 +95,11 @@ def accumulate(index):
     
     return factor * (tempSum + constant)
 
-escVel2List = []
-for i in lenRadiusList:
-    escVel2List.append(accumulate(i))
+escVel2List = []                       #| Construct an array of escape velocities 
+for i in lenRadiusList:                #|
+    escVel2List.append(escVelFunc(i))  #|
     
-escVel2List[0] = escVel2List[1]
+escVel2List[0] = escVel2List[1] # Set the i=0 and i=1 escape velocities equal 
 
 
 
@@ -107,7 +107,7 @@ escVel2List[0] = escVel2List[1]
 ##########################
 # Number Density
 ##########################
-mf = 0
+mf = 0 # Mass Fraction
 
 def numDensityList(element):
     '''

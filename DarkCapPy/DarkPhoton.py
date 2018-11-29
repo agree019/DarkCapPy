@@ -11,10 +11,9 @@ from DarkCapPy.Configure.AtomicData import *
 from DarkCapPy.Configure.PlanetData  import *
 from DarkCapPy.Configure.Conversions import amu2GeV
 
-# import os
-# this_dir, this_filename = os.path.split(__file__)
-# DATA_PATH = os.path.join(this_dir, "brtoe.csv")
-
+# import os                                          | Reference: https://stackoverflow.com/questions/779495/python-access-data-in-package-subdirectory
+# this_dir, this_filename = os.path.split(__file__)  | This was a hack for importing the branching ratio inside of this file. 
+# DATA_PATH = os.path.join(this_dir, "brtoe.csv")    | It is not presently needed, but may be useful in the future. 
 
 
 
@@ -115,7 +114,7 @@ def dMVelDist(u, N_0 = normalization()):
 
 	Returns the fraction of DM particles with velocity u in the Galactic frame
 
-	N_0 is the normalization fixed by the function normalization
+	N_0 is the normalization defined by the function normalization
 	'''
 
 	# The if-else structure accounts for the Heaviside function
@@ -142,7 +141,7 @@ def fCross(u):
 	Returns the fraction of DM particles with velocity u in the Earth frame
 	'''
 	def integrand(x,y): #x = cos(theta), y = cos(phi)
-	    cosGamma = 0.51
+	    cosGamma = 0.51 # tilt between orbital planes of Earth and Sun
 	    return 0.25 * dMVelDist( ( u**2 + ((V_dot) + (V_cross*cosGamma) * y)**2 \
 	                              + 2 * u * ((V_dot) + (V_cross*cosGamma) * y) *x)** 0.5  )
 
@@ -236,7 +235,7 @@ def intDuDEr(element, m_X, m_A, rIndex):
 	'''
 	intDuDER(element, m_X, m_A, rIndex):
 
-	Returns the velocity and recoil energy integral for dark photon scattering
+	Returns the evaluated velocity and recoil energy integrals for dark photon scattering
 
 	[m_X] = GeV
 	[m_A] = GeV
@@ -265,7 +264,7 @@ def intDuDErKappa0(element, m_X, rIndex):
 	'''
 	intDuDErKappa0(element, m_X, rIndex):
 
-	returns the velocity and recoil energy integration for dark photon scattering 
+	returns the evaluated velocity and recoil energy integration for dark photon scattering 
 		used in the kappa0 calculation
 
 	[m_X] = GeV
@@ -294,7 +293,7 @@ def sumOverR(element, m_X, m_A):
 	'''
 	sumOverR(element, m_X, m_A)
 
-	Returns the Summation over radius of the velocity and recoil energy integration
+	Returns the summation over radius of the velocity and recoil energy integration
 
 	[m_X] = GeV
 	[m_A] = GeV
@@ -314,13 +313,12 @@ def sumOverR(element, m_X, m_A):
 
 def sumOverRKappa0(element, m_X):
 	'''
-	sumOverR(element, m_X, m_A)
+	sumOverRKappa0(element, m_X)
 
-	Returns the Summation over radius of the velocity and recoil energy integration
+	Returns the summation over radius of the velocity and recoil energy integration
 		used in the kappa0 calculation
 
 	[m_X] = GeV
-	[m_A] = GeV
 	'''
 	tempSum = 0
     
@@ -349,7 +347,7 @@ def singleElementCap(element, m_X, m_A, epsilon, alpha, alpha_X):
 	m_N = amu2GeV(atomicNumbers[element])
 	n_X = 0.3/m_X # GeV/cm^3
 
-	conversion = (5.06e13)**-3 * (1.52e24) # (cm^-3)(GeV^-2) -> s^-1
+	conversion = (5.06e13)**-3 * (1.52e24) # Conversion to seconds (cm^-3)(GeV^-2) -> (s^-1)
 	prefactors = (4*np.pi)**2
 	crossSectionFactors = 2 * (4*np.pi) * epsilon**2 * alpha_X * alpha * Z_N**2 * m_N
 	function = n_X * conversion* crossSectionFactors* prefactors * sumOverR(element, m_X, m_A)
@@ -367,10 +365,10 @@ def singleElementCapKappa0(element, m_X, alpha):
 	m_N = amu2GeV(atomicNumbers[element])
 	n_X = 0.3/m_X # 1/cm^3
 
-	conversion = (5.06e13)**-3 * (1.52e24) # cm^-3 GeV^-2 -> s^-1
+	conversion = (5.06e13)**-3 * (1.52e24) # (cm^-3)(GeV^-2) -> (s^-1)
 	crossSectionFactors = 2 * (4*np.pi) * alpha * Z_N**2 * m_N
 
-	prefactor = (4*np.pi)**2  
+	prefactor = (4*np.pi)**2 
 
 	function = n_X * conversion * prefactor * crossSectionFactors * sumOverRKappa0(element, m_X)
 	return function
@@ -390,8 +388,8 @@ def cCap(m_X, m_A, epsilon, alpha, alpha_X):
 
 	returns the full capture rate in sec^-1 for the specified parameters
 
-	Note: This calculation is the "dumb" way to do this, as for every point in (m_A, epsilon) space,
-		you must calculate this quantity
+	Note: This function is the less efficient way to perform this calculation. Every point in (m_A, epsilon) space 
+		involves peforming the full tripple integral which is time consuming.
 
 	[m_X] = GeV
 	[m_A] = GeV
@@ -415,9 +413,9 @@ def kappa_0(m_X, alpha):
 
 	[m_X] = GeV
 
-	This funciton encodes how the capture rate depends on m_X and alpha
+	This funciton encodes how the capture rate depends on m_X and alpha.
 	'''
-	tempSum = 0
+	tempSum = 0 # tempSum = "temporary sum" not "temperature sum"
 	for element in elementList:
 		function = singleElementCapKappa0(element, m_X, alpha)
 		tempSum += function
@@ -431,14 +429,19 @@ def cCapQuick(m_X, m_A, epsilon, alpha_X, kappa0):
 	'''
 	cCapQuick(m_X, m_A, epsilon, alpha_X, kappa0): 
 
-	Returns the Capture rate in a much more computationally efficient way
+	Returns the Capture rate in a much more computationally efficient way. For a given dark matter mass m_X and coupling
+		constant alpha, we calculate the quantity kappa_0 once and multiply it by the differential cross section approximation
+		for each point in (m_A, epsilon) space. 
 
-	[m_X] = GeV
+
+	[m_X] = GeV, 
 	[m_A] = GeV
 
 	Provides a quick way to calculate the capture rate when only m_A and epsilon are changing.
 
-	All the m_X dependence, which is assumed to be fixed, is contianed in kappa0
+	All the m_X dependence, which is assumed to be fixed, is contianed in kappa0. 
+	Note that m_X is defined as an input to this function, but not actually used. 
+		This was made in light of keeping the function definitions in Python consistent.
 	'''
 	function = epsilon**2 * alpha_X * kappa0 / m_A**4
 	return function
@@ -451,8 +454,11 @@ def cCapQuick(m_X, m_A, epsilon, alpha_X, kappa0):
 def alphaTherm(m_X, m_A):
     '''
     alphaTherm(m_X,m_A)
+
+    [m_X] = GeV
+    [m_A] = GeV
     
-    This function sets alpha_X given the dark matter relic abundance
+    This function determines the dark matter fine structure constant alpha_X given the dark matter relic abundance.
     '''
 
     conversion = (5.06e13)**3/ (1.52e24) # cm^3 Sec -> GeV^-2
@@ -467,7 +473,8 @@ def alphaThermApprox(m_X):
     '''
     alphaThermApprox(m_X)
     
-    This function sets alpha given the dark matter relic abundance in the m_X >> m_A limit
+    This function determines the dark matter fine structure constant alpha_X given the dark matter relic abundance 
+    	in the m_X >> m_A approximation.
     '''
     conversion = (5.06e13)**3/ (1.52e24) # cm^3 Sec -> GeV^-2
     thermAvgSigmaV = 2.2e-26 # cm^3/s from ArXiV: 1602.01465v3 between eqns (4) and (5)
@@ -491,7 +498,7 @@ def v0func(m_X):
 	'''
 	v0func(m_X)
 
-	Returns the typical velocity of a dark matter particle with mass m_X at the center of the Earth
+	Returns the characteristic velocity of a dark matter particle with mass m_X at the center of the Earth.
 
 	[m_X] = GeV
 	'''
@@ -534,12 +541,10 @@ def sommerfeld(v, m_X, m_A, alpha_X):
 	[m_X] = GeV
 	[m_A] = GeV
 	'''
+	a = v / (2 * alpha_X)						# Variable substitution
+	c = 6 * alpha_X * m_X / (np.pi**2 * m_A)    # Variable substitution
 
-
-	a = v / (2 * alpha_X)
-	c = 6 * alpha_X * m_X / (np.pi**2 * m_A)
-
-	# Kludge: Absolute value the argument of the square root inside Cos(...)
+	# Kludge: Absolute value the argument of the square root inside Cos(...) two lines below.
 	function = np.pi/a * np.sinh(2*np.pi*a*c) / \
 		( np.cosh(2*np.pi*a*c) - np.cos(2*np.pi*np.abs(np.sqrt(np.abs(c-(a*c)**2)) ) ) )
 	return function
@@ -552,7 +557,7 @@ def thermAvgSommerfeld(m_X, m_A, alpha_X):
 	'''
 	thermAvgSommerfeld(m_X, m_A, alpha_X):
 
-	Returns the Thermally-averaged Sommerfeld enhancement
+	Returns the thermally-averaged Sommerfeld enhancement
 
 	[m_X] = GeV
 	[m_A] = GeV
@@ -568,7 +573,7 @@ def thermAvgSommerfeld(m_X, m_A, alpha_X):
 		return function
 
 	lowV = 0
-	# Python doesn't like it when you integrate to infinity, so we integrate out to 10 standard deviations
+	# Python doesn't like it when you integrate to infinity, so we integrate to 10 standard deviations
 	highV = 10*(v0func(m_X))
 
 	integral = integrate.quad(integrand, lowV, highV)[0]
@@ -608,10 +613,10 @@ def tau(CCap,CAnn):
 	'''
 	tau(CCap,CAnn)
 
-	returns the equilibrium time in sec^-1
+	Returns the equilibrium time in sec
 
-	[Ccap] = sec^-1
-	[Cann] = sec^-1
+	[CCap] = sec^-1
+	[CAnn] = sec^-1
 	'''
 	function = 1./(np.sqrt(CCap*CAnn))
 
@@ -625,13 +630,14 @@ def contourFunction(m_A, alpha_X, Cann0, Sommerfeld, kappa0, contourLevel):
 	'''
 	EpsilonFuncMA(m_A, alpha_X, Cann, Sommerfeld, kappa0, contourLevel) 
 
-	returns the value of Epsilon as a function of mediator mass. 
+	Returns the value of epsilon as a function of mediator mass m_A. 
 
 	[m_A]  = GeV
 	Cann0  = sec^-1
 	Kappa0 = GeV^5
 
 	Note: The 10^n contour is input as contourLevel = n
+	This function is used to quickly generate plots of constant tau/tau_Cross in (m_A, epsilon) space.
 	'''
 	function = 2 * np.log10(m_A) - (0.5)*np.log10(alpha_X * kappa0 * Cann0 * Sommerfeld) \
 	            - contourLevel - np.log10(tauCross)
@@ -647,10 +653,10 @@ def gammaAnn(CCap, CAnn):
 	'''
 	gammaAnn(CCap, CAnn) 
 
-	returns the solution to the differential rate equation for dark matter capture and annihilation
+	Returns the solution to the differential rate equation for dark matter capture and annihilation
 
-	[Ccap] = sec^-1
-	[Cann] = sec^-1
+	[CCap] = sec^-1
+	[CAnn] = sec^-1
 	'''
 	Tau = tau(CCap, CAnn)
 	EQRatio = tauCross/Tau
@@ -665,9 +671,9 @@ def gammaAnn(CCap, CAnn):
 
 def decayLength(m_X, m_A, epsilon, BR):
 	'''
-	decayLength(m_X, m_A, epsilon, BR) 
+	DecayLength(m_X, m_A, epsilon, BR) 
 
-	returns the characteristic length of dark photons in cm
+	Returns the characteristic decay length of dark photons in cm.
 
 	[m_X] = GeV
 	[m_A] = GeV
@@ -686,12 +692,12 @@ def epsilonDecay(decayLength, effectiveDepth = 10**5): # Effective depth = 1 km
 	'''
 	epsilonDecay(decayLength, effectiveDepth = 10**5) 
 
-	Returns the probability for dark photons to decay between near the surface of Earth
+	Returns the probability for dark photons to decay inside the IceCube detector near the surface of Earth.
 
 	[effectiveDepth] = cm, default value for the IceCube Neutrino Observatory is 1 km.
 	'''
-	arg1 = RCross
-	arg2 = RCross + effectiveDepth
+	arg1 = RCross                   # To make the arguments of the exponentials nice
+	arg2 = RCross + effectiveDepth  # To make the arguments of the exponentials nice
 
 	function = np.exp(-arg1/decayLength) - np.exp(-arg2/decayLength)
 	return function
@@ -706,7 +712,7 @@ def iceCubeSignal(gammaAnn, epsilonDecay, T, Aeff = 10**10):
 	'''
 	iceCubeSignal(gammaAnn, epsilonDecay, liveTime, Aeff = 10**10) 
 
-	returns the signal rate for IceCube
+	Returns the number of signal events for IceCube.
 
 	[gammaAnn] = sec^-1 
 	[liveTime] = sec
