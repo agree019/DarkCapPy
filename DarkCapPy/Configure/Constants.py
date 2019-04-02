@@ -1,4 +1,4 @@
-from .Conversions import  yr2s
+from .Conversions import yr2s
 from .PlanetData  import RCross_Planet
 from .PlanetData  import RCrit_Planet
 

@@ -41,9 +41,17 @@ densityList = densityListBadUnits[1:] * (100)**-3 * 1000 #  in g/cm^3
 # Define Planet Constants
 # Updated on 4/2/19
 # These two vales are imported into the Constants.py file
+#
+# Rcross_Planet is the radius of the capturing body in cm
+# RCrit_Planet is the value in cm which separates the core from the mantle
 ##########################
 RCross_Planet = max(radiusList) # The radius of the capturing body
 RCrit_Planet  = radiusList[int(np.floor(len(radiusList)/2))] # The radius which separates the mantle from the core
+                                                             # By default, this is set to half the radius of the body
+                                                             # To reproduce the numbers in "Package Test," 
+                                                             #    comment this out and set RCrit_Planet = 3.48e8 (in cm)
+                                                             # For reference, this is index 273 in the list
+
 
 
 ##########################
@@ -135,7 +143,7 @@ def numDensityList(element):
         if radiusList[i] < RCrit_Planet:
             mf = coreMassFrac[element]
             
-        elif RCrit <= radiusList[i] <= RCross_Planet:
+        elif RCrit_Planet <= radiusList[i] <= RCross_Planet:
             mf = mantleMassFrac[element]
             
         elif radiusList[i] > RCross_Planet:
