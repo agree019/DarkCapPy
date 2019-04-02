@@ -1,5 +1,6 @@
-from .Conversions import  yr2s
-
+from .Conversions import yr2s
+from .PlanetData  import RCross_Planet
+from .PlanetData  import RCrit_Planet
 
 ########################
 # Capture  
@@ -22,9 +23,8 @@ V_cross = 29.8e5/c                   # Dimensionless
 V_gal = 550.0e5/c                    # Dimensionless
 u_0 = 245.0e5/c                      # Dimensionless
 k = 2.5                              # Dimensionless
-RCross = 6.738e8                     # cm
-RCrit = 3.48e8       			     # cm
-
+RCross = RCross_Planet               # cm
+RCrit = RCrit_Planet                 # cm
 
 
 ##########################
