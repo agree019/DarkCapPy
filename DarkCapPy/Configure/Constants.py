@@ -24,7 +24,7 @@ V_gal = 550.0e5/c                    # Dimensionless
 u_0 = 245.0e5/c                      # Dimensionless
 k = 2.5                              # Dimensionless
 RCross = RCross_Planet               # cm
-RCrit = RCrit_Planet     			       # cm
+RCrit = RCrit_Planet                 # cm
 
 
 ##########################
