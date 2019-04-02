@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from scipy import interpolate
 
-from .Constants import *
+# from .Constants import *
 from .AtomicData import *
 from .Conversions import *
 
@@ -29,11 +29,21 @@ densityTemp1 = data[['Density[kg/m^3]']] # Density in kg/m^3
 radiusListBadUnits = np.asarray(radiusTemp1).squeeze()
 densityListBadUnits = np.asarray(densityTemp1).squeeze()
 
+
 # Convert Units and trim off the zero-index value
+# These are the lists we use for the rest of the computation
 radiusList = radiusListBadUnits[1:] * 100 # cm
 densityList = densityListBadUnits[1:] * (100)**-3 * 1000 #  in g/cm^3
 
 
+
+##########################
+# Define Planet Constants
+# Updated on 4/2/19
+# These two vales are imported into the Constants.py file
+##########################
+RCross_Planet = max(radiusList) # The radius of the capturing body
+RCrit_Planet  = radiusList[int(np.floor(len(radiusList)/2))] # The radius which separates the mantle from the core
 
 
 ##########################
@@ -81,7 +91,9 @@ def escVelFunc(index):
     
     returns the escape velocity at the specified index
     '''
-    factor = 2.*G/c**2 # prefactor
+    G_Newton = 6.674e-11 * 100**3 * (1000)**-1 # in cm^3/(g s^2)
+    c = 3e10 # in cm/s
+    factor = 2.*G_Newton/c**2 # prefactor
     constant = max(enclosedMassList) / max(radiusList)
     
     if (index == 0):
@@ -120,13 +132,13 @@ def numDensityList(element):
     numDensityList = []
     for i in lenRadiusList:
         
-        if radiusList[i] < RCrit:
+        if radiusList[i] < RCrit_Planet:
             mf = coreMassFrac[element]
             
-        elif RCrit <= radiusList[i] <= RCross:
+        elif RCrit <= radiusList[i] <= RCross_Planet:
             mf = mantleMassFrac[element]
             
-        elif radiusList[i] > RCross:
+        elif radiusList[i] > RCross_Planet:
             mf = 0
 
         ##########################################################
