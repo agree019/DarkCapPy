@@ -13,7 +13,8 @@ from .Conversions import *
 import os
 this_dir, this_filename = os.path.split(__file__)
 # Planet_Path = 'DarkCapPy/Configure/PREM500_Mod.csv'
-Planet_Path = 'DarkCapPy/Configure/struct_b16_agss09.csv'
+# Planet_Path = 'DarkCapPy/Configure/struct_b16_agss09.csv'
+Planet_Path = os.path.join(this_dir, "struct_b16_agss09.csv")
 ##########################
 
 
