@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from scipy import interpolate
 
-# from .Constants import *
+from .Constants import *
 from .AtomicData import *
 from .Conversions import *
 
@@ -12,162 +12,162 @@ from .Conversions import *
 # This imports the file 'PREM500.csv' within the DarkCapPy package so the user doesn't have to.
 import os
 this_dir, this_filename = os.path.split(__file__)
-DATA_PATH = os.path.join(this_dir, "PREM500.csv")
+# Planet_Path = 'DarkCapPy/Configure/PREM500_Mod.csv'
+Planet_Path = 'DarkCapPy/Configure/struct_b16_agss09.csv'
 ##########################
 
 
-
 ##########################
-# Read in Earth Data
+# Earth radius and mass
 ##########################
-data = pd.read_csv(DATA_PATH)
-
-radiusTemp1 = data['Radius[m]']  # Radius in meters
-densityTemp1 = data[['Density[kg/m^3]']] # Density in kg/m^3
-
-# # The interpolation function doesn't like these objects, so they need to be massaged into 1-D numpy arrays
-radiusListBadUnits = np.asarray(radiusTemp1).squeeze()
-densityListBadUnits = np.asarray(densityTemp1).squeeze()
-
-
-# Convert Units and trim off the zero-index value
-# These are the lists we use for the rest of the computation
-radiusList = radiusListBadUnits[1:] * 100 # cm
-densityList = densityListBadUnits[1:] * (100)**-3 * 1000 #  in g/cm^3
-
+# Planet_Radius = 6.371e8  # cm
+# Planet_Mass   = 5.972e27 # grams
 
 
 ##########################
-# Define Planet Constants
-# Updated on 4/2/19
-# These two vales are imported into the Constants.py file
-#
-# Rcross_Planet is the radius of the capturing body in cm
-# RCrit_Planet is the value in cm which separates the core from the mantle
+# Sun radius and mass
 ##########################
-RCross_Planet = max(radiusList) # The radius of the capturing body
-RCrit_Planet  = radiusList[int(np.floor(len(radiusList)/2))] # The radius which separates the mantle from the core
-                                                             # By default, this is set to half the radius of the body
-                                                             # To reproduce the numbers in "Package Test," 
-                                                             #    comment this out and set RCrit_Planet = 3.48e8 (in cm)
-                                                             # For reference, this is index 273 in the list
+Planet_Radius = 69.551e9 # cm 
+Planet_Mass   = 1.989e33 # g
 
+# Variables to be used in DarkPhoton.py
+# 1). radius_List
+# 2). deltaR_List
+# 3). escVel2_List
+# 4). element_List
+
+
+
+########################################################
+#                  Data Input                          #
+########################################################
+
+
+##########################
+# Read in Planet Data
+##########################
+Planet_File = pd.read_csv(Planet_Path,  delim_whitespace=True, header = 8)
+
+radius_List = Planet_File['Radius'] * Planet_Radius
+enclosedMass_List = Planet_File['Mass'] * Planet_Mass
+element_List = np.asarray(Planet_File.columns[6:-1])
+
+
+assert len(radius_List) == len(enclosedMass_List), 'Lengths of radius list and enclosed mass list do not match'
 
 
 ##########################
 # Shell Thickness
 ##########################
-# We define the variable 'radiusListm1' in order to give a deltaRList which has the same length as radiusList
-radiusListm1 = radiusList[0:len(radiusList)-1]
-s = [0] # Temporary variable used to obtain deltaRList. Stores radiusList offset by one index.
-for i in radiusListm1:
-    s.append(i)
 
-deltaRList = radiusList[0:len(radiusList)] - s[0:len(s)]
+def deltaR_Func(radiusList):
+    # Input is a list if radiii values,
+    # output is a list of deltaR values
+    # DeltaR = Next radius - current radius
+    
+    # We define the variable 'radiusListm1' in order to give a deltaRList which has the same length as radiusList
+    radiusListm1 = radiusList[0:len(radiusList)-1]
+    s = [0] # Temporary variable used to obtain deltaRList. Stores radiusList offset by one index.
+    for i in radiusListm1:
+        s.append(i)
 
-
+    deltaRList = radiusList[0:len(radiusList)] - s[0:len(s)]
+    return deltaRList
 
 ##########################
 # Shell Mass
 ##########################
-shellMassList = []
-lenRadiusList = range(0,len(radiusList))
-for i in lenRadiusList:
-    shellMassList.append(4 * np.pi * radiusList[i]**2 * densityList[i] * deltaRList[i])
+
+def shellMass_Func(totalMassList):
+    shellMass_List = []
+    bigMass = 0
+    smallMass = 0
+    for i in range(0,len(totalMassList)):
+        if i == 0:
+            shellMass_List.append(0)
+        else:
+            bigMass = totalMassList[i]
+            smallMass = totalMassList[i-1]
+            shellMass_List.append(bigMass-smallMass)
+    return shellMass_List
 
 
 
 ##########################
-# Enclosed Mass
+# Shell Density
 ##########################
-enclosedMassList = []
-tempMassSum = 0 # Temporary mass shell sum
-for i in shellMassList:
-    tempMassSum = tempMassSum + i # add value of shellMass to previous sum
-    enclosedMassList.append(tempMassSum)
+
+def shellDensity_Func(shellMass, shellRadius, deltaR):
+	shellDensity = []
+	for i in range(0,len(shellMass)):
+		shellDensity.append(shellMass[i]/(4*np.pi*shellRadius[i]**2 * deltaR[i]))
+	# Kludge for radius = 0     
+	shellDensity[0] = shellDensity[1]
+	return shellDensity
+
+
+##########################
+# Number Density of each element
+##########################
+def numDensity_Func(element):
+    numDensityList = []
+    for i in range(0,len(shellDensity_List)):
+        mf = Planet_File[str(element)][i]
+        numDensityList.append(mf * g2GeV(shellDensity_List[i]) / amu2GeV(atomicNumbers[element]))
+    return numDensityList
+
+
 
 
 ##########################
 # Escape Velocity
 ##########################
 
-def escVelFunc(index):
-    '''
-    escVelFunc(index)
-
-    This is the exact same function as Accumulate in Mathematica
+def escVel_Func(index, enclosedMassList, radiusList, deltaRList):
     
-    returns the escape velocity at the specified index
-    '''
     G_Newton = 6.674e-11 * 100**3 * (1000)**-1 # in cm^3/(g s^2)
     c = 3e10 # in cm/s
     factor = 2.*G_Newton/c**2 # prefactor
     constant = max(enclosedMassList) / max(radiusList)
     
+    assert len(enclosedMassList) == len(radiusList), 'Lengths of Enclosed mass list and radius list do not match' 
+    assert len(radiusList) == len(deltaRList), 'Lengths of radius list and delta R list do not match'
+
     if (index == 0):
         tempSum = 0
-        
+
     elif (index != 0):
         tempSum = 0    
         for i in range(index, len(radiusList)):
             summand = enclosedMassList[i] * deltaRList[i] / (radiusList[i])**2
             tempSum += summand
-    
-    return factor * (tempSum + constant)
 
-escVel2List = []                       #| Construct an array of escape velocities 
-for i in lenRadiusList:                #|
-    escVel2List.append(escVelFunc(i))  #|
-    
-escVel2List[0] = escVel2List[1] # Set the i=0 and i=1 escape velocities equal 
-
+    return (factor * (tempSum + constant))
 
 
 
 ##########################
-# Number Density
+# Generate all lists
 ##########################
-mf = 0 # Mass Fraction
+deltaR_List = deltaR_Func(radius_List)
+shellMass_List = shellMass_Func(enclosedMass_List)
+shellDensity_List = shellDensity_Func(shellMass_List, radius_List, deltaR_List)
 
-def numDensityList(element):
-    '''
-    numDensityList(element)
-
-    See ElementList in AtomicData.py for valid elements
-
-    Returns: the number density array of element
-    '''
-    numDensityList = []
-    for i in lenRadiusList:
-        
-        if radiusList[i] < RCrit_Planet:
-            mf = coreMassFrac[element]
-            
-        elif RCrit_Planet <= radiusList[i] <= RCross_Planet:
-            mf = mantleMassFrac[element]
-            
-        elif radiusList[i] > RCross_Planet:
-            mf = 0
-
-        ##########################################################
-        # [mf] = mass fraction = dimensionless
-        # [densityList] = g/cm^3
-        # [atomicNumbers] = dimensionless
-        # To make life easy, we convert everything into GeV
-        #    => densityList -> g2GeV(densitylist)
-        #    => atomicNumbers -> amu2GeV(atomicNumbers)
-        
-        n_i = mf * g2GeV(densityList[i]) /(amu2GeV(atomicNumbers[element]))
-
-        numDensityList.append(n_i)
-        
-    return numDensityList
+escVel2_List = []                            #| Construct an array of escape velocities 
+for i in range(0,len(radius_List)):          #|
+    escVel2_List.append(escVel_Func(i, enclosedMass_List, radius_List, deltaR_List))  #|
+    
+escVel2_List[0] = escVel2_List[1] # Set the i=0 and i=1 escape velocities equal 
 
 
 
 ##########################
 # Interpolate
+# These are intentionally commented out, we don't actually use them in DarkPhoton.py
+# I'm not sure why I made these but they are here if they are usefull
 ##########################
-enclosedMassInterp = interpolate.interp1d(radiusList,enclosedMassList,kind='linear') # g
-escVel2Interp = interpolate.interp1d(radiusList,escVel2List,kind='linear')           # Dimensionless
-densityInterp = interpolate.interp1d(radiusList,densityList,kind='linear')           # g/cm^3
+# Earth_enclosedMassInterp = interpolate.interp1d(radius_List, enclosedMass_List, kind='linear') 
+# Earth_escVel2Interp = interpolate.interp1d(radius_List, escVel2_List, kind='linear')           
+# Earth_densityInterp = interpolate.interp1d(radius_List,Earth_density_List,kind='linear')
+
+
