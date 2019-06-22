@@ -11,6 +11,11 @@ from DarkCapPy.Configure.AtomicData import *
 from DarkCapPy.Configure.PlanetData  import *
 from DarkCapPy.Configure.Conversions import amu2GeV
 
+
+# This is a workaround to get the Planet_File dataframe from PlanetData.py into this module
+global Planet_File_DarkPhoton
+Planet_File_DarkPhoton = Planet_File
+
 # import os                                          | Reference: https://stackoverflow.com/questions/779495/python-access-data-in-package-subdirectory
 # this_dir, this_filename = os.path.split(__file__)  | This was a hack for importing the branching ratio inside of this file. 
 # DATA_PATH = os.path.join(this_dir, "brtoe.csv")    | It is not presently needed, but may be useful in the future. 
@@ -160,7 +165,7 @@ for vel in velRange:
 	fCrossVect.append(fCross(vel))
 
 dMVelInterp = interpolate.interp1d(velRange, DMVect, kind = 'linear')
-fCrossInterp = interpolate.interp1d(velRange, fCrossVect, kind='linear')
+fCrossInterp = interpolate.interp1d(velRange, fCrossVect, kind ='linear')
 
 
 
@@ -189,12 +194,12 @@ def eMax(element, m_X, rIndex, u):
 
 	[m_X] = GeV
 
-	rIndex specifies the index in the escape velocity array escVel2List[rIndex]
+	rIndex specifies the index in the escape velocity array escVel2_List[rIndex]
 	'''
 
 	m_N = amu2GeV(atomicNumbers[element])
 	mu = m_N*m_X / (m_N + m_X)
-	vCross2 = (escVel2List[rIndex])
+	vCross2 = (escVel2_List[rIndex])
 	function = 2 * mu**2 * (u**2 + vCross2) / m_N
 #     assert (function >= 0), '(element, m_X, rIndex, u): (%s, %e, %i, %e) result in negative eMax' %(element, m_X, rIndex, u)
 	return function
@@ -217,7 +222,7 @@ def EminEmaxIntersection(element, m_X, rIndex):
 	m_N = amu2GeV(atomicNumbers[element])
 	mu = (m_N*m_X)/(m_N+m_X)
 
-	sqrtvCross2 = np.sqrt(escVel2List[rIndex])
+	sqrtvCross2 = np.sqrt(escVel2_List[rIndex])
 	# Calculate the intersection uInt of eMin and eMax given a specific rIndex
 	A = m_X/2. 
 	B = 2. * mu**2 / m_N
@@ -301,10 +306,13 @@ def sumOverR(element, m_X, m_A):
 
 	tempSum = 0
     
-	for i in range(0, len(radiusList)):
-		r = radiusList[i]
-		deltaR = deltaRList[i]
-		n_N = numDensityList(element)[i]
+	for i in range(0, len(radius_List)):
+		r = radius_List[i]
+		deltaR = deltaR_List[i]
+
+		n_N = numDensity_Func(element)[i]
+		# n_N = Planet_File_DarkPhoton[str(element)][i]
+
 		summand = n_N * r**2 * intDuDEr(element, m_X, m_A, i) * deltaR
 		tempSum += summand
 	return tempSum
@@ -322,10 +330,13 @@ def sumOverRKappa0(element, m_X):
 	'''
 	tempSum = 0
     
-	for i in range(0,len(radiusList)):
-		r = radiusList[i]
-		deltaR = deltaRList[i]
-		n_N = numDensityList(element)[i]
+	for i in range(0,len(radius_List)):
+		r = radius_List[i]
+		deltaR = deltaR_List[i]
+
+		n_N = numDensity_Func(element)[i]
+		# n_N = Planet_File_DarkPhoton[str(element)][i]
+		
 		summand = n_N * r**2 * intDuDErKappa0(element, m_X, i) * deltaR
 		tempSum += summand
 	return tempSum
@@ -395,7 +406,7 @@ def cCap(m_X, m_A, epsilon, alpha, alpha_X):
 	[m_A] = GeV
 	'''
 	totalCap = 0
-	for element in elementList:
+	for element in element_List:
 		totalCap += singleElementCap(element, m_X, m_A, epsilon, alpha, alpha_X)
 	    
 	return totalCap
@@ -416,7 +427,7 @@ def kappa_0(m_X, alpha):
 	This funciton encodes how the capture rate depends on m_X and alpha.
 	'''
 	tempSum = 0 # tempSum = "temporary sum" not "temperature sum"
-	for element in elementList:
+	for element in element_List:
 		function = singleElementCapKappa0(element, m_X, alpha)
 		tempSum += function
 
@@ -434,7 +445,7 @@ def cCapQuick(m_X, m_A, epsilon, alpha_X, kappa0):
 		for each point in (m_A, epsilon) space. 
 
 
-	[m_X] = GeV, 
+	[m_X] = GeV 
 	[m_A] = GeV
 
 	Provides a quick way to calculate the capture rate when only m_A and epsilon are changing.

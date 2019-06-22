@@ -8,6 +8,10 @@ include DarkCapPy/DarkCapPy_Test.ipynb
 
 include DarkCapPy/Configure/PREM500.csv
 
+include DarkCapPy/Configure/PREM500_Mod.csv
+
+include DarkCapPy/Configure/struct_b16_agss09.csv
+
 include DarkCapPy/Template_Calculation/DarkCapPy_Template.ipynb
 
 include DarkCapPy/Template_Calculation/Branching_Ratio/brtoe.csv
