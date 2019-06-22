@@ -21,15 +21,15 @@ Planet_Path = os.path.join(this_dir, "PREM500_Mod.csv")
 ##########################
 # Earth radius and mass
 ##########################
-# Planet_Radius = 6.371e8  # cm
-# Planet_Mass   = 5.972e27 # grams
+Planet_Radius = 6.371e8  # cm
+Planet_Mass   = 5.972e27 # grams
 
 
 ##########################
 # Sun radius and mass
 ##########################
-Planet_Radius = 69.551e9 # cm 
-Planet_Mass   = 1.989e33 # g
+# Planet_Radius = 69.551e9 # cm 
+# Planet_Mass   = 1.989e33 # g
 
 # Variables to be used in DarkPhoton.py
 # 1). radius_List
