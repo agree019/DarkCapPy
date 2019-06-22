@@ -27,6 +27,8 @@ DarkCapPy/
 ||--Constants.py
 ||--PlanetData.py
 ||--PREM500.csv
+||--PREM500_Mod.csv
+||--struct_b16_agss09.csv
 ||Template_Calculation/
 ||--DarkCapPy_Template.ipynb
 ||--Branching_Ratio/
@@ -57,6 +59,12 @@ This file initializes the planet-dependent quantities, eg: enclosed mass, escape
 
 #### PREM500.csv
 This csv file contains radius and density information about Earth.
+
+#### PREM500_Mod.csv
+This csv file contains the radius, enclosed mass, and elemental composition of Earth and is formatted to match struct_b16_agss09.csv
+
+#### struct_b16_agss09.csv
+This csv file contains the structural information and elemental composition of the sun
 
 #### DarkCapPy_Template.ipynb
 This Jupyter notebook contains an example implementation of DarkCapPy
