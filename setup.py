@@ -10,7 +10,7 @@ setup(
 		'DarkCapPy.Configure'
 		   ],
 
-	version = '1.0',
+	version = '2.0',
 
 	description = 'Pyton functions for ArXiV:1509.07525v3',
 
