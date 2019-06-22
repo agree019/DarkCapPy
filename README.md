@@ -16,7 +16,11 @@ __Python Packages__
 
 ## Installation with PIP
 
+To download the main repository:
 `pip install git+https://github.com/agree019/DarkCapPy`
+
+To download a working branch:
+`pip install git+https://github.com/agree019/DarkCapPy.git@<brach name>`
 
 ## Package Structure
 ```
