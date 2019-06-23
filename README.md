@@ -4,6 +4,10 @@ Written by: Adam Green (agree019@ucr.edu) and Philip Tanedo (flip.tanedo@ucr.edu
 
 DarkCapPy is a Python 3/Jupyter package for calculating rates associated with dark matter capture in the Earth, annihilation into light mediators, and the subsequent observable decay of the light mediators near the surface of the Earth. The package includes a calculation of the Sommerfeld enhancement at the center of the Earth and the timescale for capture--annihilation equilibrium. The code is open source and can be modified for other compact astronomical objects and mediator spins. The reference paper can be found at: https://arxiv.org/abs/1509.07525v3. Along with being included in the package, the manual can be found at https://arxiv.org/abs/1808.03700.
 
+## Version 2.0
+
+In this update, we extended the functionality of DarkCapPy to allow the dark matter capture process to be calculated from any planetary body with data matching the AGSS09 solar composition dataset, found at: http://www.ice.csic.es/personal/aldos/Solar_Data.html. Previously, DarkCapPy was able only able to calculate the capture process for Earth. We have since adapted DarkCapPy to accept the AGSS09 solar dataset and modified the original Earth dataset to match the format of the AGSS09 set. 
+
 ## DarkCapPy Dependencies
 
 Python 3.6.2
@@ -13,13 +17,12 @@ __Python Packages__
  - Scipy 0.19.1
  - Pandas 0.22.0
 
-
 ## Installation with PIP
 
 To download the main repository:
 `pip install git+https://github.com/agree019/DarkCapPy`
 
-To download a working branch:
+To download a specific branch:
 `pip install git+https://github.com/agree019/DarkCapPy.git@<brach name>`
 
 ## Package Structure
