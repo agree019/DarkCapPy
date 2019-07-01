@@ -12,24 +12,28 @@ from .Conversions import *
 # This imports the file 'PREM500.csv' within the DarkCapPy package so the user doesn't have to.
 import os
 this_dir, this_filename = os.path.split(__file__)
-# Planet_Path = os.path.join(this_dir, "PREM500_Mod.csv")
-Planet_Path = os.path.join(this_dir, "struct_b16_agss09.csv")
-# Sun file is -> struct_b16_agss09.csv
-##########################
+# this_dir, this_filename = os.path.split(__file__)
+
 
 
 ##########################
 # Earth radius and mass
 ##########################
-Planet_Radius = 6.371e8  # cm
-Planet_Mass   = 5.972e27 # grams
+# Planet_Path = os.path.join(this_dir1, "PREM500_Mod.csv")
+# VelocityDist_Path = os.path.join(this_dir2, "EarthDMVelDist.csv")
+# Planet_Radius = 6.371e8     # cm
+# Planet_Mass   = 5.972e27    # grams
+# Planet_Life   = yr2s(4.5e9) # 4.5 Gyr -> sec
 
 
 ##########################
 # Sun radius and mass
 ##########################
-# Planet_Radius = 69.551e9 # cm 
-# Planet_Mass   = 1.989e33 # g
+Planet_Path = os.path.join(this_dir, "struct_b16_agss09.csv")
+Vel_Dist_Path = os.path.join(this_dir, "SunDMVelDist.csv")
+Planet_Radius = 69.551e9    # cm 
+Planet_Mass   = 1.989e33    # g
+Planet_Life   = yr2s(4.5e9) # 4.5 Gyr -> sec
 
 # Variables to be used in DarkPhoton.py
 # 1). radius_List
