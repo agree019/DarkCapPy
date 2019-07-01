@@ -21,15 +21,15 @@ Planet_Path = os.path.join(this_dir, "struct_b16_agss09.csv")
 ##########################
 # Earth radius and mass
 ##########################
-# Planet_Radius = 6.371e8  # cm
-# Planet_Mass   = 5.972e27 # grams
+Planet_Radius = 6.371e8  # cm
+Planet_Mass   = 5.972e27 # grams
 
 
 ##########################
 # Sun radius and mass
 ##########################
-Planet_Radius = 69.551e9 # cm 
-Planet_Mass   = 1.989e33 # g
+# Planet_Radius = 69.551e9 # cm 
+# Planet_Mass   = 1.989e33 # g
 
 # Variables to be used in DarkPhoton.py
 # 1). radius_List
@@ -48,12 +48,12 @@ Planet_Mass   = 1.989e33 # g
 # Read in Planet Data
 ##########################
 Planet_File = pd.read_csv(Planet_Path,  delim_whitespace=True, header = 8)
+Vel_Dist_File = pd.read_csv(Vel_Dist_Path)
+
 
 radius_List = Planet_File['Radius'] * Planet_Radius
 enclosedMass_List = Planet_File['Mass'] * Planet_Mass
-# element_List = np.asarray(Planet_File.columns[6:-1])
-
-element_List = ['H1']
+element_List = np.asarray(Planet_File.columns[6:-1])
 
 
 assert len(radius_List) == len(enclosedMass_List), 'Lengths of radius list and enclosed mass list do not match'
@@ -156,12 +156,31 @@ deltaR_List = deltaR_Func(radius_List)
 shellMass_List = shellMass_Func(enclosedMass_List)
 shellDensity_List = shellDensity_Func(shellMass_List, radius_List, deltaR_List)
 
+
+assert len(radius_List) == len(deltaR_List)
+assert len(radius_List) == len(shellMass_List)
+assert len(radius_List) == len(shellDensity_List)
+
 escVel2_List = []                            #| Construct an array of escape velocities 
 for i in range(0,len(radius_List)):          #|
     escVel2_List.append(escVel_Func(i, enclosedMass_List, radius_List, deltaR_List))  #|
     
 escVel2_List[0] = escVel2_List[1] # Set the i=0 and i=1 escape velocities equal 
 
+
+##########################
+# DM Velocity Distrubution
+##########################
+velocity_Range_List = Vel_Dist_File['Velocity_Range']        # A list of velocities between 0 and V_gal
+planet_velocity_List   = Vel_Dist_File['VelocityDist_Planet_Frame'] # The DM velocity distrubution in the planet frame
+
+
+########################
+# Interpolate the Velocity Distribution
+########################
+velRange = velocity_Range_List
+fCrossVect = planet_velocity_List
+fCrossInterp = interpolate.interp1d(velRange, fCrossVect, kind ='linear')
 
 
 ##########################

@@ -4,7 +4,6 @@ from distutils.core import setup
 setup(
 	name = 'DarkCapPy',
 
-	# packages = find_packages(),
 	packages = [
 		'DarkCapPy',
 		'DarkCapPy.Configure'

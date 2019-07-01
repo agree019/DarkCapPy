@@ -12,10 +12,6 @@ from DarkCapPy.Configure.PlanetData  import *
 from DarkCapPy.Configure.Conversions import amu2GeV
 
 
-# This is a workaround to get the Planet_File dataframe from PlanetData.py into this module
-global Planet_File_DarkPhoton
-Planet_File_DarkPhoton = Planet_File
-
 # import os                                          | Reference: https://stackoverflow.com/questions/779495/python-access-data-in-package-subdirectory
 # this_dir, this_filename = os.path.split(__file__)  | This was a hack for importing the branching ratio inside of this file. 
 # DATA_PATH = os.path.join(this_dir, "brtoe.csv")    | It is not presently needed, but may be useful in the future. 
@@ -71,102 +67,6 @@ def crossSectionKappa0(element, E_R): # Dimensionless
 	FN2 = formFactor2(element, E_R)
 	function = FN2
 	return function
-
-
-########################
-# Dark Matter Velocity Distributions
-########################
-def normalization():
-	def function(u):
-	# The if-else structure accounts for the Heaviside function
-	    if ((V_gal) - u < 0):
-	        integrand = 0.
-
-	    elif ( ((V_gal) - (u)) >= 0):
-	        numerator = ((V_gal)**2 - (u)**2)
-	        denominator = (k * (u_0)**2)
-	        arg = ( numerator / denominator)
-	        integrand = 4*np.pi* u**2 * (np.expm1(arg))** k
-	    return integrand
-
-	tempA = integrate.quad(function, 0, V_gal)[0]
-	N_0 = 1./tempA
-	return N_0
-# N_1 = normalization()
-
-
-def normalizationChecker(u, N_0 = normalization()):
-    '''
-    normalizationChecker(u, N_0 = normalization()) 
-
-    Exists only to check that the normalization N_0 of dMVelDist
-    '''
-    if ( (V_gal - u) < 0):
-        integrand = 0.
-        
-    elif ( (V_gal - u) >= 0):
-        numerator = ( (V_gal)**2 - (u)**2)
-        denominator = (k * (u_0)**2)
-        arg = ( numerator / denominator)
-        integrand = N_0 * 4*np.pi*u**2* (np.expm1(arg)) ** k
-    return integrand
-
-        
-
-def dMVelDist(u, N_0 = normalization()): 
-	'''
-	dMVelDist(u, N_0 = normalization)
-
-	Returns the fraction of DM particles with velocity u in the Galactic frame
-
-	N_0 is the normalization defined by the function normalization
-	'''
-
-	# The if-else structure accounts for the Heaviside function
-
-	if ((V_gal - u) < 0):
-	    integrand = 0
-	    
-	elif ((V_gal - u) >= 0):
-	    numerator = ( (V_gal)**2 - (u)**2)
-	    denominator = (k * (u_0)**2)
-	    arg = ( numerator / denominator)
-	    integrand = N_0 * (np.expm1(arg)) ** k
-
-	return integrand
-
-
-########################
-# Earth Frame Velocity Distribution
-########################
-def fCross(u):
-	'''
-	fCross(u)
-
-	Returns the fraction of DM particles with velocity u in the Earth frame
-	'''
-	def integrand(x,y): #x = cos(theta), y = cos(phi)
-	    cosGamma = 0.51 # tilt between orbital planes of Earth and Sun
-	    return 0.25 * dMVelDist( ( u**2 + ((V_dot) + (V_cross*cosGamma) * y)**2 \
-	                              + 2 * u * ((V_dot) + (V_cross*cosGamma) * y) *x)** 0.5  )
-
-	return integrate.dblquad(integrand, -1, 1, lambda y: -1, lambda y: 1)[0]
-
-
-########################
-# Interpolate the Velocity Distributions
-########################
-velRange = np.linspace(0, V_gal, 1000)
-
-fCrossVect = []
-DMVect = []
-for vel in velRange:
-	DMVect.append(dMVelDist(vel))
-	fCrossVect.append(fCross(vel))
-
-dMVelInterp = interpolate.interp1d(velRange, DMVect, kind = 'linear')
-fCrossInterp = interpolate.interp1d(velRange, fCrossVect, kind ='linear')
-
 
 
 
@@ -256,7 +156,7 @@ def intDuDEr(element, m_X, m_A, rIndex):
 	uInt = EminEmaxIntersection(element, m_X, rIndex)
 
 	uLow = 0
-	uHigh = uInt
+	uHigh = min(uInt, V_gal) # We take the minimal value between the intersection velocity and galactic escape velocity
 	eLow = lambda u: eMin(u, m_X)
 	eHigh = lambda u: eMax(element, m_X, rIndex, u)
 	integral = integrate.dblquad(integrand, uLow, uHigh, eLow, eHigh)[0]
@@ -284,7 +184,7 @@ def intDuDErKappa0(element, m_X, rIndex):
 	uInt = EminEmaxIntersection(element, m_X, rIndex)
 
 	uLow = 0
-	uHigh = uInt
+	uHigh = min(uInt, V_gal) # We take the minimal value between the intersection velocity and galactic escape velocity
 	eLow = lambda u: eMin(u, m_X)
 	eHigh = lambda u: eMax(element, m_X, rIndex, u)
 	integral = integrate.dblquad(integrand, uLow, uHigh, eLow, eHigh)[0]
@@ -311,7 +211,6 @@ def sumOverR(element, m_X, m_A):
 		deltaR = deltaR_List[i]
 
 		n_N = numDensity_Func(element)[i]
-		# n_N = Planet_File_DarkPhoton[str(element)][i]
 
 		summand = n_N * r**2 * intDuDEr(element, m_X, m_A, i) * deltaR
 		tempSum += summand
@@ -335,7 +234,6 @@ def sumOverRKappa0(element, m_X):
 		deltaR = deltaR_List[i]
 
 		n_N = numDensity_Func(element)[i]
-		# n_N = Planet_File_DarkPhoton[str(element)][i]
 		
 		summand = n_N * r**2 * intDuDErKappa0(element, m_X, i) * deltaR
 		tempSum += summand
@@ -387,9 +285,6 @@ def singleElementCapKappa0(element, m_X, alpha):
 
 
 
-
-
-
 ########################
 # Full Capture Rate
 ########################
@@ -400,15 +295,17 @@ def cCap(m_X, m_A, epsilon, alpha, alpha_X):
 	returns the full capture rate in sec^-1 for the specified parameters
 
 	Note: This function is the less efficient way to perform this calculation. Every point in (m_A, epsilon) space 
-		involves peforming the full tripple integral which is time consuming.
+		involves peforming the full tripple integral over recoil energy, incident DM velocity, and Earth radius
+		which is time consuming.
 
 	[m_X] = GeV
 	[m_A] = GeV
 	'''
 	totalCap = 0
 	for element in element_List:
-		totalCap += singleElementCap(element, m_X, m_A, epsilon, alpha, alpha_X)
-	    
+		elementCap = singleElementCap(element, m_X, m_A, epsilon, alpha, alpha_X)
+		print ('Element:', element,',' 'Cap: ', elementCap)
+		totalCap += elementCap 
 	return totalCap
 
 
