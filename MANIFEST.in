@@ -12,6 +12,10 @@ include DarkCapPy/Configure/PREM500_Mod.csv
 
 include DarkCapPy/Configure/struct_b16_agss09.csv
 
+include DarkCapPy/Configure/EarthDMVelDist.csv
+
+include DarkCapPy/Configure/SunDMVelDist.csv
+
 include DarkCapPy/Template_Calculation/DarkCapPy_Template.ipynb
 
 include DarkCapPy/Template_Calculation/Branching_Ratio/brtoe.csv

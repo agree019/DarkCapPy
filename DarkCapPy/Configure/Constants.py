@@ -1,6 +1,6 @@
-from .Conversions import  yr2s
+from .Conversions import yr2s
 from .PlanetData  import Planet_Radius
-# from .PlanetData  import RCrit_Earth
+from .PlanetData  import Planet_Life
 
 ########################
 # Capture  
@@ -23,8 +23,7 @@ V_cross = 29.8e5/c                   # Dimensionless
 V_gal = 550.0e5/c                    # Dimensionless
 u_0 = 245.0e5/c                      # Dimensionless
 k = 2.5                              # Dimensionless
-RCross = Planet_Radius                # cm
-# RCrit = RCrit_Earth    		    	 # cm
+RCross = Planet_Radius               # cm
 
 
 ##########################
@@ -38,4 +37,4 @@ global tauCross # Age of Earth in seconds
 Gnat = 6.71e-39        # GeV^-2
 rhoCross = 5.67e-17    # GeV^4
 TCross = 4.9134e-10    # GeV
-tauCross = yr2s(4.5e9) # sec
+tauCross = Planet_Life # sec
