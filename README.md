@@ -36,6 +36,8 @@ DarkCapPy/
 ||--PREM500.csv
 ||--PREM500_Mod.csv
 ||--struct_b16_agss09.csv
+||--EarthDMVelDist.csv
+||--SunDmVelDist.csv
 ||Template_Calculation/
 ||--DarkCapPy_Template.ipynb
 ||--Branching_Ratio/
@@ -72,6 +74,12 @@ This csv file contains the radius, enclosed mass, and elemental composition of E
 
 #### struct_b16_agss09.csv
 This csv file contains the structural information and elemental composition of the sun
+
+#### EarthDMVelDist.csv
+This csv file contains the dark matter velocity distributions in the galactic frame and the Earth frame.
+
+#### SunDMVelDist.csv
+This csv file contains the dark matter velocity distributions in the galactic frame and the Sun frame.
 
 #### DarkCapPy_Template.ipynb
 This Jupyter notebook contains an example implementation of DarkCapPy
