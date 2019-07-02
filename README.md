@@ -8,6 +8,8 @@ DarkCapPy is a Python 3/Jupyter package for calculating rates associated with da
 
 In this update, we extended the functionality of DarkCapPy to allow the dark matter capture process to be calculated from any planetary body with data matching the AGSS09 solar composition dataset, found at: http://www.ice.csic.es/personal/aldos/Solar_Data.html. Previously, DarkCapPy was able only able to calculate the capture process for Earth. We have since adapted DarkCapPy to accept the AGSS09 solar dataset and modified the original Earth dataset to match the format of the AGSS09 set. 
 
+We also change the way DarkCapPy handles the Dark Matter velocity distribution. In version 1, the velocity distributions in both the galactic and planetary frame were calculated within DarkCapPy. In version 2, these distributions must be included as separate csv files. 
+
 ## DarkCapPy Dependencies
 
 Python 3.6.2
