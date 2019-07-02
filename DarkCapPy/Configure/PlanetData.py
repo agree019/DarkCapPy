@@ -29,7 +29,7 @@ this_dir, this_filename = os.path.split(__file__)
 ##########################
 # Sun radius and mass
 ##########################
-Planet_Path = os.path.join(this_dir, "struct_b16_agss09.csv")
+Planet_Path   = os.path.join(this_dir, "struct_b16_agss09.csv")
 Vel_Dist_Path = os.path.join(this_dir, "SunDMVelDist.csv")
 Planet_Radius = 69.551e9    # cm 
 Planet_Mass   = 1.989e33    # g
