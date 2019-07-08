@@ -6,10 +6,11 @@ import numpy as np
 import scipy.integrate as integrate
 import scipy.interpolate as interpolate
 
-from DarkCapPy.Configure.Constants  import *
-from DarkCapPy.Configure.AtomicData import *
+from DarkCapPy.Configure.Constants   import *
+from DarkCapPy.Configure.AtomicData  import *
 from DarkCapPy.Configure.PlanetData  import *
 from DarkCapPy.Configure.Conversions import amu2GeV
+from DarkCapPy.Configure.PlanetData  import Planet_Radius, Planet_Mass, Planet_LifeTime, Planet_Density, Planet_Temperature, escVel2_List, velRange
 
 
 # import os                                          | Reference: https://stackoverflow.com/questions/779495/python-access-data-in-package-subdirectory
@@ -40,7 +41,7 @@ def formFactor2(element, E):
 ########################
 # Photon Scattering Cross Sections
 ########################
-def crossSection(element, m_A, E_R): # returns 1/GeV^3
+def crossSection(element, m_X, m_A, epsilon, alpha, alpha_X, rIndex, u, E_R): # returns 1/GeV^3
 	'''
 	crossSection(element, m_A, E_R)
     
@@ -48,11 +49,18 @@ def crossSection(element, m_A, E_R): # returns 1/GeV^3
 
     [m_A] = GeV
     [E_R] = GeV
-    '''
+    u = dark matter velocity
+    E_R = , the recoil energy imparted to the capturing body
 
+    The w^2 factor in the denominator cancels out in the u integration.
+    We have canceled it already in this function even though it shows up as an argument
+    '''
 	m_N = amu2GeV(atomicNumbers[element])
 	FN2 = formFactor2(element, E_R)
-	function = ( FN2 ) / ((2 * m_N * E_R + m_A**2)**2)
+	Z_N = nProtons[element]
+
+	prefactors = 2 * (4*np.pi) * epsilon**2 * alpha_X * alpha * Z_N**2
+	function = prefactors * m_N * ( FN2 ) / ( (2 * m_N * E_R + m_A**2)**2)
 	return function
 
 def crossSectionKappa0(element, E_R): # Dimensionless
@@ -68,6 +76,77 @@ def crossSectionKappa0(element, E_R): # Dimensionless
 	function = FN2
 	return function
 
+
+########################
+# Dark Matter Velocity Distributions
+########################
+
+# def dMVelDist_Unnormed(u):
+#     if ((V_gal - u) < 0):
+# 	    integrand = 0
+	    
+#     elif ((V_gal - u) >= 0):
+# 	    numerator = ( (V_gal)**2 - (u)**2)
+# 	    denominator = (k * (u_0)**2)
+# 	    arg = ( numerator / denominator)
+# 	    integrand = (np.expm1(arg)) ** k
+#     return integrand
+
+
+# def normalization():
+#     def integrand(u):
+#         return (4*np.pi * u**2 * dMVelDist_Unnormed(u))
+#     value = integrate.quad(integrand,0,V_gal)[0]
+#     return (1/value)
+
+
+# def dMVelDist(u, N_0 = normalization()):
+#     function = dMVelDist_Unnormed(u) * N_0
+#     return function
+
+
+########################
+# Planet-frame Velocity Distribution
+########################
+
+# def fCross(u):
+# 	'''
+# 	fCross(u)
+
+# 	Returns the fraction of DM particles with velocity u in the Earth frame
+# 	'''
+# 	def integrand(x,y): #x = cos(theta), y = cos(phi)
+# 	    cosGamma = 0.51 # tilt between orbital planes of Earth and Sun
+# 	    return 0.25 * dMVelDist( ( u**2 + ((V_dot) + (V_cross*cosGamma) * y)**2 \
+# 	                              + 2 * u * ((V_dot) + (V_cross*cosGamma) * y) *x)** 0.5  )
+# 	return integrate.dblquad(integrand, -1, 1, lambda y: -1, lambda y: 1)[0]
+
+# def fDot(u):
+# 	'''
+# 	fDot(u)
+# 	Returns the fraction of DM Particles with velocity u in the Sun frame
+# 	'''
+# 	def integrand(x):
+# 		return 0.5*dmVelDist( np.sqrt (u**2 + V_dot**2 + 2u*V_dot**2*x) )
+# 	return integrate.quad(integrand,-1,1)[0]
+
+
+########################
+# Recoil Energy Integral
+########################
+def intdER(element, m_X, m_A, epsilon, alpha, alpha_X, rIndex, u):
+	'''
+	intdER(element,m_X,m_A,epsilon,alpha,alpha_X,rIndex,u)
+
+	returns the evaluation of the recoil energy integration
+	'''
+	
+    def integrand(ER):
+        return crossSection(element,m_X,m_A,epsilon,alpha,alpha_X,rIndex,u,ER)
+    eMinLim = eMin(u,m_X)
+    eMaxLim = eMax(element,m_X,rIndex,u)
+    evaluate = integrate.quad(integrand,eMinLim,eMaxLim)[0]
+    return evaluate
 
 
 ########################
@@ -132,37 +211,19 @@ def EminEmaxIntersection(element, m_X, rIndex):
 
 
 
-
 ########################
-# Photon Velocity and Energy Integration
+# Velocity and Recoil Energy Integrations
 ########################
-def intDuDEr(element, m_X, m_A, rIndex):
-	'''
-	intDuDER(element, m_X, m_A, rIndex):
-
-	Returns the evaluated velocity and recoil energy integrals for dark photon scattering
-
-	[m_X] = GeV
-	[m_A] = GeV
-	'''
-    
-	def integrand(E,u):
-		fu = fCrossInterp(u)
-		integrand = crossSection(element, m_A, E) * u * fu
-
-		return integrand
-
-	# Calculate the intersection uInt of eMin and eMax given a specific rIndex
-	uInt = EminEmaxIntersection(element, m_X, rIndex)
-
-	uLow = 0
-	uHigh = min(uInt, V_gal) # We take the minimal value between the intersection velocity and galactic escape velocity
-	eLow = lambda u: eMin(u, m_X)
-	eHigh = lambda u: eMax(element, m_X, rIndex, u)
-	integral = integrate.dblquad(integrand, uLow, uHigh, eLow, eHigh)[0]
-	return integral
-
-
+def intDuDEr(element, m_X, m_A, epsilon, alpha, alpha_X, rIndex):
+    def integrand(u):
+        fu = fCrossInterp(u)
+        dER = intdER(element, m_X, m_A, epsilon, alpha, alpha_X, rIndex, u)
+        function = u * fu * dER
+        return function
+    uMin = 0
+    uMax = min(EminEmaxIntersection(element, m_X, rIndex), max(velocity_Range_List))
+    evaluation = integrate.quad(integrand ,uMin, uMax)[0]
+    return evaluation 
 
 
 def intDuDErKappa0(element, m_X, rIndex):
@@ -184,7 +245,7 @@ def intDuDErKappa0(element, m_X, rIndex):
 	uInt = EminEmaxIntersection(element, m_X, rIndex)
 
 	uLow = 0
-	uHigh = min(uInt, V_gal) # We take the minimal value between the intersection velocity and galactic escape velocity
+	uHigh = min(uInt, max(velRange00)) # We take the minimal value between the intersection velocity and galactic escape velocity
 	eLow = lambda u: eMin(u, m_X)
 	eHigh = lambda u: eMax(element, m_X, rIndex, u)
 	integral = integrate.dblquad(integrand, uLow, uHigh, eLow, eHigh)[0]
@@ -194,7 +255,7 @@ def intDuDErKappa0(element, m_X, rIndex):
 ########################
 # Sum Over Radii
 ########################
-def sumOverR(element, m_X, m_A):
+def sumOverR(element, m_X, m_A, epsilon, alpha, alpha_X):
 	'''
 	sumOverR(element, m_X, m_A)
 
@@ -203,16 +264,18 @@ def sumOverR(element, m_X, m_A):
 	[m_X] = GeV
 	[m_A] = GeV
 	'''
-
+	# assert (len(radius_List) == len(deltaR)), 'Lengths of radius and deltaR dont match'
+	# assert (len(numDensity_Func(element)) == len(radius_List)), 'Lengths of density and radius list dont match'
+	
 	tempSum = 0
-    
+   
 	for i in range(0, len(radius_List)):
 		r = radius_List[i]
 		deltaR = deltaR_List[i]
 
 		n_N = numDensity_Func(element)[i]
 
-		summand = n_N * r**2 * intDuDEr(element, m_X, m_A, i) * deltaR
+		summand = n_N * r**2 * intDuDEr(element, m_X, m_A, epsilon, alpha, alpha_X, i) * deltaR
 		tempSum += summand
 	return tempSum
 
@@ -258,8 +321,8 @@ def singleElementCap(element, m_X, m_A, epsilon, alpha, alpha_X):
 
 	conversion = (5.06e13)**-3 * (1.52e24) # Conversion to seconds (cm^-3)(GeV^-2) -> (s^-1)
 	prefactors = (4*np.pi)**2
-	crossSectionFactors = 2 * (4*np.pi) * epsilon**2 * alpha_X * alpha * Z_N**2 * m_N
-	function = n_X * conversion* crossSectionFactors* prefactors * sumOverR(element, m_X, m_A)
+	function = n_X * conversion * prefactors * sumOverR(element, m_X, m_A, epsilon, alpha, alpha_X)
+
 	return function
 
 def singleElementCapKappa0(element, m_X, alpha):
@@ -285,6 +348,7 @@ def singleElementCapKappa0(element, m_X, alpha):
 
 
 
+
 ########################
 # Full Capture Rate
 ########################
@@ -295,8 +359,7 @@ def cCap(m_X, m_A, epsilon, alpha, alpha_X):
 	returns the full capture rate in sec^-1 for the specified parameters
 
 	Note: This function is the less efficient way to perform this calculation. Every point in (m_A, epsilon) space 
-		involves peforming the full tripple integral over recoil energy, incident DM velocity, and Earth radius
-		which is time consuming.
+		involves peforming the full tripple integral which is time consuming.
 
 	[m_X] = GeV
 	[m_A] = GeV
@@ -304,7 +367,7 @@ def cCap(m_X, m_A, epsilon, alpha, alpha_X):
 	totalCap = 0
 	for element in element_List:
 		elementCap = singleElementCap(element, m_X, m_A, epsilon, alpha, alpha_X)
-		print ('Element:', element,',' 'Cap: ', elementCap)
+		# print ('Element:', element,',' 'Cap: ', elementCap)
 		totalCap += elementCap 
 	return totalCap
 
@@ -325,9 +388,9 @@ def kappa_0(m_X, alpha):
 	'''
 	tempSum = 0 # tempSum = "temporary sum" not "temperature sum"
 	for element in element_List:
+		# print ('Start', element)
 		function = singleElementCapKappa0(element, m_X, alpha)
 		tempSum += function
-
 	return tempSum
 
 ########################
@@ -410,7 +473,7 @@ def v0func(m_X):
 
 	[m_X] = GeV
 	'''
-	return np.sqrt(2*TCross/m_X)
+	return np.sqrt(2*Planet_Temperature/m_X)
 
 
 
@@ -432,7 +495,6 @@ def sigmaVtree(m_X, m_A, alpha_X):
 
 	function = prefactor * numerator/denominator
 	return function
-
 
 
 
@@ -502,7 +564,7 @@ def cAnn(m_X, sigmaVTree, thermAvgSomm = 1):
 	[m_X] = GeV
 	[sigmaVTree] = GeV^-2
 	'''
-	prefactor = (Gnat * m_X * rhoCross/ (3 * TCross) )**(3./2)
+	prefactor = (Gnat * m_X * Planet_Density/ (3 * Planet_Temperature) )**(3./2)
 	conversion = (1.52e24) # GeV -> Sec^-1
 	function = conversion * prefactor * sigmaVTree * thermAvgSomm
 	return function
@@ -548,7 +610,7 @@ def contourFunction(m_A, alpha_X, Cann0, Sommerfeld, kappa0, contourLevel):
 	This function is used to quickly generate plots of constant tau/tau_Cross in (m_A, epsilon) space.
 	'''
 	function = 2 * np.log10(m_A) - (0.5)*np.log10(alpha_X * kappa0 * Cann0 * Sommerfeld) \
-	            - contourLevel - np.log10(tauCross)
+	            - contourLevel - np.log10(Planet_LifeTime)
 	return function
 
 
@@ -567,7 +629,7 @@ def gammaAnn(CCap, CAnn):
 	[CAnn] = sec^-1
 	'''
 	Tau = tau(CCap, CAnn)
-	EQRatio = tauCross/Tau
+	EQRatio = Planet_LifeTime/Tau
 	function = (0.5) * CCap * ((np.tanh(EQRatio))**2)
 
 	return function
@@ -587,7 +649,7 @@ def decayLength(m_X, m_A, epsilon, BR):
 	[m_A] = GeV
 	BR = Branching Ratio
 	'''
-	function = RCross * BR * (3.6e-9/epsilon)**2 * (m_X/m_A) * (1./1000) * (1./m_A)
+	function = Planet_Radius * BR * (3.6e-9/epsilon)**2 * (m_X/m_A) * (1./1000) * (1./m_A)
 	return function
 
 
@@ -604,8 +666,8 @@ def epsilonDecay(decayLength, effectiveDepth = 10**5): # Effective depth = 1 km
 
 	[effectiveDepth] = cm, default value for the IceCube Neutrino Observatory is 1 km.
 	'''
-	arg1 = RCross                   # To make the arguments of the exponentials nice
-	arg2 = RCross + effectiveDepth  # To make the arguments of the exponentials nice
+	arg1 = Planet_Radius                   # To make the arguments of the exponentials nice
+	arg2 = Planet_Radius + effectiveDepth  # To make the arguments of the exponentials nice
 
 	function = np.exp(-arg1/decayLength) - np.exp(-arg2/decayLength)
 	return function
@@ -616,7 +678,7 @@ def epsilonDecay(decayLength, effectiveDepth = 10**5): # Effective depth = 1 km
 ########################
 # Ice Cube Signal
 ########################
-def iceCubeSignal(gammaAnn, epsilonDecay, T, Aeff = 10**10):
+def iceCubeSignal(gammaAnn, epsilonDecay, liveTime, Aeff = 10**10):
 	'''
 	iceCubeSignal(gammaAnn, epsilonDecay, liveTime, Aeff = 10**10) 
 
@@ -626,7 +688,7 @@ def iceCubeSignal(gammaAnn, epsilonDecay, T, Aeff = 10**10):
 	[liveTime] = sec
 	[Aeff]     = cm^2
 	'''
-	function = 2 * gammaAnn * (Aeff/ (4*np.pi*RCross**2) ) * epsilonDecay * T
+	function = 2 * gammaAnn * (Aeff/ (4*np.pi*Planet_Radius**2) ) * epsilonDecay * liveTime
 	return function
 
 
