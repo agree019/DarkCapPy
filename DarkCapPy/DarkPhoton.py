@@ -304,7 +304,7 @@ def cCap(m_X, m_A, epsilon, alpha, alpha_X):
 	totalCap = 0
 	for element in element_List:
 		elementCap = singleElementCap(element, m_X, m_A, epsilon, alpha, alpha_X)
-		print ('Element:', element,',' 'Cap: ', elementCap)
+		# print ('Element:', element,',' 'Cap: ', elementCap)
 		totalCap += elementCap 
 	return totalCap
 
