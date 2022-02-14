@@ -160,7 +160,6 @@ deltaR_List = deltaR_Func(radius_List)
 shellMass_List = shellMass_Func(enclosedMass_List)
 shellDensity_List = shellDensity_Func(shellMass_List, radius_List, deltaR_List)
 
-
 assert len(radius_List) == len(deltaR_List)
 assert len(radius_List) == len(shellMass_List)
 assert len(radius_List) == len(shellDensity_List)
@@ -176,16 +175,29 @@ escVel2_List[0] = escVel2_List[1] # Set the i=0 and i=1 escape velocities equal
 # DM Velocity Distrubution
 ##########################
 velocity_Range_List = Vel_Dist_File['Velocity_Range']        # A list of velocities between 0 and V_gal
-planet_velocity_List   = Vel_Dist_File['VelocityDist_Planet_Frame'] # The DM velocity distrubution in the planet frame
+planet_velocity_List  = Vel_Dist_File['VelocityDist_Planet_Frame'] # The DM velocity distrubution in the planet frame
 
 
 ########################
 # Interpolate the Velocity Distribution
 ########################
+def normalization():
+    def integrand(u):
+        return (4*np.pi * u**2 * fCrossInterpNOTNORM(u))
+
+    value = integrate.quad(integrand,0,V_gal)[0]
+    return (1/value)
+
+
 velRange = velocity_Range_List
 fCrossVect = planet_velocity_List
-fCrossInterp = interpolate.interp1d(velRange, fCrossVect, kind ='linear')
+fCrossInterpNOTNORM = interpolate.interp1d(velRange, fCrossVect, kind ='linear')
+fCrossInterp = 
 
+
+def dMVelDist(u, N_0 = normalization()):
+    function = fCrossInterpNOTNORM(u) * N_0
+    return function
 
 ##########################
 # Interpolate
